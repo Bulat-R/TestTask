@@ -4,51 +4,53 @@ import com.game.entity.Player;
 import com.game.service.PlayersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/rest/players")
 public class PlayersController {
-    @Autowired
-    PlayersService service;
+    private final PlayersService service;
 
-    @GetMapping("/")
+    @Autowired
+    public PlayersController(PlayersService service) {
+        this.service = service;
+    }
+
+    @GetMapping()
     @ResponseStatus(HttpStatus.OK)
     public List<Player> getPlayersList(@RequestParam Map<String, String> params) {
-        return null;
+        return service.getPlayers(params);
     }
 
     @GetMapping("/count")
     @ResponseStatus(HttpStatus.OK)
-    public Integer getPlayersCount(@RequestParam Map<String, String> params) {
-        return null;
+    public int getPlayersCount(@RequestParam Map<String, String> params) {
+        return 1;
     }
 
-    @PostMapping("/")
-    public Player createPlayer(@RequestBody Map<String, String> params) {
+    @PostMapping()
+    public Player createPlayer(@ModelAttribute Player player) {
         return null;
     }
 
     @GetMapping("/{id}")
-    public Player getPlayer(@PathVariable Integer id) {
-        return null;
+    @ResponseStatus(HttpStatus.OK)
+    public Player getPlayer(@PathVariable long id) {
+        return service.get(id);
     }
 
     @PostMapping("/{id}")
-    public Player updatePlayer(@PathVariable Integer id, @RequestBody Map<String, String> params) {
+    public Player updatePlayer(@PathVariable int id, @ModelAttribute Player player) {
         return null;
     }
 
     @DeleteMapping("/{id}")
-    public void deletePlayer(@PathVariable Integer id) {
+    @ResponseStatus(HttpStatus.OK)
+    public void deletePlayer(@PathVariable long id) {
+        service.delete(id);
     }
-
-//    @GetMapping("/rest/players/{id}")
-//    public ResponseEntity<Player> getPlayer(@PathVariable Integer id) {
-//        return new ResponseEntity<>(service.getPlayer(id), HttpStatus.OK);
-//    }
 }
