@@ -28,12 +28,12 @@ public class PlayersController {
     @GetMapping("/count")
     @ResponseStatus(HttpStatus.OK)
     public int getPlayersCount(@RequestParam Map<String, String> params) {
-        return service.getPlayersCount(params);
+        return service.getCount(params);
     }
 
     @PostMapping()
-    public Player createPlayer(@ModelAttribute Player player) {
-        return null;
+    public Player createPlayer(@RequestBody Player player) {
+        return service.create(player);
     }
 
     @GetMapping("/{id}")

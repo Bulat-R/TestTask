@@ -1,5 +1,7 @@
 package com.game.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -7,7 +9,7 @@ import java.util.Date;
 @Table(name = "player")
 public class Player {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String title;
@@ -44,24 +46,53 @@ public class Player {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getTitle() {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public Race getRace() {
         return race;
+    }
+
+    public void setRace(Race race) {
+        this.race = race;
     }
 
     public Profession getProfession() {
         return profession;
     }
 
+    public void setProfession(Profession profession) {
+        this.profession = profession;
+    }
+
     public Integer getExperience() {
         return experience;
+    }
+
+    public void setExperience(Integer experience) {
+        this.experience = experience;
+    }
+
+    public void calcLevel() {
+        level = (int) ((Math.sqrt(2500 + 200 * experience) - 50) / 100);
+        untilNextLevel = 50 * (level + 1) * (level + 2) - experience;
     }
 
     public Integer getLevel() {
@@ -76,40 +107,12 @@ public class Player {
         return birthday;
     }
 
-    public Boolean getBanned() {
-        return banned;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setRace(Race race) {
-        this.race = race;
-    }
-
-    public void setProfession(Profession profession) {
-        this.profession = profession;
-    }
-
-    public void setExperience(Integer experience) {
-        this.experience = experience;
-    }
-
-    public void setLevel(Integer level) {
-        this.level = level;
-    }
-
-    public void setUntilNextLevel(Integer untilNextLevel) {
-        this.untilNextLevel = untilNextLevel;
-    }
-
     public void setBirthday(Date birthday) {
         this.birthday = birthday;
+    }
+
+    public Boolean getBanned() {
+        return banned;
     }
 
     public void setBanned(Boolean banned) {

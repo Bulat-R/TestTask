@@ -6,6 +6,7 @@ import com.game.entity.Profession;
 import com.game.entity.Race;
 import com.game.exceptions.IdNotFoundException;
 import com.game.exceptions.IdNotValidException;
+import com.game.exceptions.ParametersNotValidException;
 import com.game.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -13,30 +14,48 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static java.util.Calendar.DAY_OF_MONTH;
 
 @Service
 public class PlayersService {
 
     private final PlayerRepository repository;
+    @PersistenceContext
     private final EntityManager entityManager;
 
-    @Autowired
     public PlayersService(PlayerRepository repository, LocalContainerEntityManagerFactoryBean entityManager) {
         this.repository = repository;
         this.entityManager = entityManager.getObject().createEntityManager();
     }
 
     @Transactional
-    public void delete(long id) {
-        validateId(id);
-        repository.deleteById(id);
+    public List<Player> getPlayers(Map<String, String> params) {
+        CriteriaQuery<Player> playerCriteriaQuery = getPlayerCriteriaQuery(params);
+
+        int pageSize = Integer.parseInt(params.getOrDefault("pageSize", "3"));
+        int firstResult = pageSize * Integer.parseInt(params.getOrDefault("pageNumber", "0"));
+
+        return entityManager.createQuery(playerCriteriaQuery).setFirstResult(firstResult).setMaxResults(pageSize).getResultList();
+    }
+
+    @Transactional
+    public int getCount(Map<String, String> params) {
+        CriteriaQuery<Player> playerCriteriaQuery = getPlayerCriteriaQuery(params);
+        return entityManager.createQuery(playerCriteriaQuery).getResultList().size();
+    }
+
+    @Transactional
+    public Player create(Player player) {
+        validatePlayer(player);
+        player.calcLevel();
+        return repository.saveAndFlush(player);
     }
 
     @Transactional(readOnly = true)
@@ -45,25 +64,16 @@ public class PlayersService {
         return repository.findById(id).get();
     }
 
-    private void validateId(long id) {
-        if (!repository.existsById(id)) {
-            throw new IdNotFoundException();
-        }
-        if (id < 1) {
-            throw new IdNotValidException();
-        }
+    @Transactional
+    public Player update() {
+        return null;
     }
 
+
     @Transactional
-    public List<Player> getPlayers(Map<String, String> params) {
-        CriteriaQuery<Player> playerCriteriaQuery = getPlayerCriteriaQuery(params);
-
-        int pageNumber = Integer.parseInt(params.getOrDefault("pageNumber", "0"));
-        int pageSize = Integer.parseInt(params.getOrDefault("pageSize", "3"));
-        int firstResult = pageSize * pageNumber;
-        int maxResult = firstResult + pageSize;
-
-        return entityManager.createQuery(playerCriteriaQuery).setFirstResult(firstResult).setMaxResults(maxResult).getResultList();
+    public void delete(long id) {
+        validateId(id);
+        repository.deleteById(id);
     }
 
     private CriteriaQuery<Player> getPlayerCriteriaQuery(Map<String, String> params) {
@@ -115,9 +125,33 @@ public class PlayersService {
         return predicates;
     }
 
-    @Transactional
-    public int getPlayersCount(Map<String, String> params) {
-        CriteriaQuery<Player> playerCriteriaQuery = getPlayerCriteriaQuery(params);
-        return entityManager.createQuery(playerCriteriaQuery).getResultList().size();
+    private void validateId(long id) {
+        if (!repository.existsById(id)) {
+            throw new IdNotFoundException();
+        }
+        if (id < 1) {
+            throw new IdNotValidException();
+        }
+    }
+
+
+    private void validatePlayer(Player player) {
+        if (player.getName() == null || player.getTitle() == null || player.getRace() == null
+            || player.getProfession() == null || player.getBirthday() == null || player.getExperience() == null) {
+            throw new ParametersNotValidException();
+        }
+        if (player.getName().isEmpty() || player.getName().length() > 12) {
+            throw new ParametersNotValidException();
+        }
+        if (player.getTitle().length() > 30) {
+            throw new ParametersNotValidException();
+        }
+        if (player.getExperience() < 0 || player.getExperience() > 10_000_000) {
+            throw new ParametersNotValidException();
+        }
+        if (player.getBirthday().getTime() < new GregorianCalendar(2000, Calendar.JANUARY, 1).getTimeInMillis()
+            || player.getBirthday().getTime() > new GregorianCalendar(3001, Calendar.JANUARY, 1).getTimeInMillis() - 1) {
+            throw new ParametersNotValidException();
+        }
     }
 }
