@@ -43,8 +43,8 @@ public class PlayersController {
     }
 
     @PostMapping("/{id}")
-    public Player updatePlayer(@PathVariable int id, @ModelAttribute Player player) {
-        return null;
+    public Player updatePlayer(@PathVariable int id, @RequestBody Player player) {
+        return service.update(id, player);
     }
 
     @DeleteMapping("/{id}")

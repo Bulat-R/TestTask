@@ -8,7 +8,6 @@ import com.game.exceptions.IdNotFoundException;
 import com.game.exceptions.IdNotValidException;
 import com.game.exceptions.ParametersNotValidException;
 import com.game.repository.PlayerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +19,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.*;
-
-import static java.util.Calendar.DAY_OF_MONTH;
 
 @Service
 public class PlayersService {
@@ -65,8 +62,18 @@ public class PlayersService {
     }
 
     @Transactional
-    public Player update() {
-        return null;
+    public Player update(int id, Player player) {
+        validateId(id);
+        Player playerUp = get(id);
+        if (player.getName() != null) playerUp.setName(player.getName());
+        if (player.getTitle() != null) playerUp.setTitle(player.getTitle());
+        if (player.getRace() != null) playerUp.setRace(player.getRace());
+        if (player.getProfession() != null) playerUp.setProfession(player.getProfession());
+        if (player.getBirthday() != null) playerUp.setBirthday(player.getBirthday());
+        if (player.getBanned() != null) playerUp.setBanned(player.getBanned());
+        if (player.getExperience() != null) playerUp.setExperience(player.getExperience());
+        validatePlayer(playerUp);
+        return repository.saveAndFlush(playerUp);
     }
 
 
@@ -137,7 +144,7 @@ public class PlayersService {
 
     private void validatePlayer(Player player) {
         if (player.getName() == null || player.getTitle() == null || player.getRace() == null
-            || player.getProfession() == null || player.getBirthday() == null || player.getExperience() == null) {
+                || player.getProfession() == null || player.getBirthday() == null || player.getExperience() == null) {
             throw new ParametersNotValidException();
         }
         if (player.getName().isEmpty() || player.getName().length() > 12) {
@@ -150,7 +157,7 @@ public class PlayersService {
             throw new ParametersNotValidException();
         }
         if (player.getBirthday().getTime() < new GregorianCalendar(2000, Calendar.JANUARY, 1).getTimeInMillis()
-            || player.getBirthday().getTime() > new GregorianCalendar(3001, Calendar.JANUARY, 1).getTimeInMillis() - 1) {
+                || player.getBirthday().getTime() > new GregorianCalendar(3001, Calendar.JANUARY, 1).getTimeInMillis() - 1) {
             throw new ParametersNotValidException();
         }
     }
