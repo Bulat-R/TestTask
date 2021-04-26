@@ -62,7 +62,7 @@ public class PlayersService {
     }
 
     @Transactional
-    public Player update(int id, Player player) {
+    public Player update(Long id, Player player) {
         validateId(id);
         Player playerUp = get(id);
         if (player.getName() != null) playerUp.setName(player.getName());
@@ -73,12 +73,13 @@ public class PlayersService {
         if (player.getBanned() != null) playerUp.setBanned(player.getBanned());
         if (player.getExperience() != null) playerUp.setExperience(player.getExperience());
         validatePlayer(playerUp);
+        playerUp.calcLevel();
         return repository.saveAndFlush(playerUp);
     }
 
 
     @Transactional
-    public void delete(long id) {
+    public void delete(Long id) {
         validateId(id);
         repository.deleteById(id);
     }
@@ -109,35 +110,35 @@ public class PlayersService {
             predicates.add(criteriaBuilder.equal(playerRoot.get("profession"), Profession.valueOf(params.get("profession"))));
         }
         if (params.get("after") != null) {
-            predicates.add(criteriaBuilder.greaterThanOrEqualTo(playerRoot.get("birthday"), Long.valueOf(params.get("after"))));
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(playerRoot.get("birthday"), new Date(Long.parseLong(params.get("after")))));
         }
         if (params.get("before") != null) {
-            predicates.add(criteriaBuilder.lessThanOrEqualTo(playerRoot.get("birthday"), Long.valueOf(params.get("before"))));
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(playerRoot.get("birthday"), new Date(Long.parseLong(params.get("before")))));
         }
         if (params.get("banned") != null) {
-            predicates.add(criteriaBuilder.equal(playerRoot.get("banned"), Boolean.valueOf(params.get("banned"))));
+            predicates.add(criteriaBuilder.equal(playerRoot.get("banned"), Boolean.parseBoolean(params.get("banned"))));
         }
         if (params.get("minExperience") != null) {
-            predicates.add(criteriaBuilder.greaterThanOrEqualTo(playerRoot.get("experience"), Integer.valueOf(params.get("minExperience"))));
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(playerRoot.get("experience"), Integer.parseInt(params.get("minExperience"))));
         }
         if (params.get("maxExperience") != null) {
-            predicates.add(criteriaBuilder.lessThanOrEqualTo(playerRoot.get("experience"), Integer.valueOf(params.get("maxExperience"))));
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(playerRoot.get("experience"), Integer.parseInt(params.get("maxExperience"))));
         }
         if (params.get("minLevel") != null) {
-            predicates.add(criteriaBuilder.greaterThanOrEqualTo(playerRoot.get("level"), Integer.valueOf(params.get("minLevel"))));
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(playerRoot.get("level"), Integer.parseInt(params.get("minLevel"))));
         }
         if (params.get("maxLevel") != null) {
-            predicates.add(criteriaBuilder.lessThanOrEqualTo(playerRoot.get("level"), Integer.valueOf(params.get("maxLevel"))));
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(playerRoot.get("level"), Integer.parseInt(params.get("maxLevel"))));
         }
         return predicates;
     }
 
-    private void validateId(long id) {
-        if (!repository.existsById(id)) {
-            throw new IdNotFoundException();
-        }
+    private void validateId(Long id) {
         if (id < 1) {
             throw new IdNotValidException();
+        }
+        if (!repository.existsById(id)) {
+            throw new IdNotFoundException();
         }
     }
 

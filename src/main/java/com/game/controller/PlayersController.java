@@ -38,18 +38,18 @@ public class PlayersController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Player getPlayer(@PathVariable long id) {
+    public Player getPlayer(@PathVariable Long id) {
         return service.get(id);
     }
 
     @PostMapping("/{id}")
-    public Player updatePlayer(@PathVariable int id, @RequestBody Player player) {
+    public Player updatePlayer(@PathVariable Long id, @RequestBody Player player) {
         return service.update(id, player);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deletePlayer(@PathVariable long id) {
+    public void deletePlayer(@PathVariable Long id) {
         service.delete(id);
     }
 }
